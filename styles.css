@@ -15,7 +15,6 @@
 
 .lightSquare,
 .darkSquare {
-  font-size: 450%;
   text-align: center;
   vertical-align: middle;
 }
@@ -26,4 +25,8 @@
 
 .darkSquare {
   background-color: rgb(181, 136, 99);
+}
+
+img {
+  margin-top: 20px;
 }
