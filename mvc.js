@@ -30,9 +30,11 @@ const model = {
         ,
     },
     input: {
-        piecesOnTheBoard: {
+        squaresOnTheBoard: {
             position: {
                 currentValue: [],
+                letterValue: '',
+                numberValue: '',
                 pieceType: []
             },
         },
@@ -58,8 +60,9 @@ function renderChessBoard() {
             const position = row + char
             const colHtml = (row + col) % 2 ? 'lightSquare' : 'darkSquare'
             rowHtml += `<div class="${colHtml}">
-             ${placePieces(row, col, position) ?? ''}
-             ${model.input.piecesOnTheBoard.position[position].currentValue.join('')}
+            ${position}
+             ${placePieces(row, col, position, char) ?? ''}
+             ${model.input.squaresOnTheBoard.position[position].currentValue.join('')}
                         </div>`
         }
         boardHtml += rowHtml
@@ -68,7 +71,7 @@ function renderChessBoard() {
 
     return boardHtml
 }
-function placePieces(row, col, position) {
+function placePieces(row, col, position, char) {
     const whitePiecesRow = 1;
     const whitePawnRow = 2;
 
@@ -77,42 +80,65 @@ function placePieces(row, col, position) {
 
     if (row == whitePawnRow) {
         console.log('whitepawn ' + row)
-        model.input.piecesOnTheBoard.position[`${position}`] = {
+        model.input.squaresOnTheBoard.position[`${position}`] = {
             currentValue: [`<img onclick="movePiece('${position}')" class="${model.data.pieces.white[8].name}" src="${model.data.pieces.white[8].src}">`],
-            pieceType: model.data.pieces.white[8].name
+            letterValue: char,
+            numberValue: row,
+            pieceType: [model.data.pieces.white[8].name]
         }
     }
     else if (row == blackPawnRow) {
         console.log('blackpawn ' + row)
-        model.input.piecesOnTheBoard.position[`${position}`] = {
+        model.input.squaresOnTheBoard.position[`${position}`] = {
             currentValue: [`<img onclick="movePiece('${position}')" class="${model.data.pieces.black[8].name}" src="${model.data.pieces.black[8].src}">`],
-            pieceType: model.data.pieces.black[8].name
+            letterValue: char,
+            numberValue: row,
+            pieceType: [model.data.pieces.black[8].name]
         }
     }
 
     else if (row == whitePiecesRow) {
         console.log('whitePieces ' + row)
-        model.input.piecesOnTheBoard.position[`${position}`] = {
+        model.input.squaresOnTheBoard.position[`${position}`] = {
             currentValue: [`<img onclick="movePiece('${position}')" class="${model.data.pieces.black[col = (col - 1)].name}" src="${model.data.pieces.white[col].src}">`],
-            pieceType: model.data.pieces.white[col = (col - 1)].name
+            letterValue: char,
+            numberValue: row,
+            pieceType: [model.data.pieces.white[col].name]
         }
     }
     else if (row == blackPiecesRow) {
         console.log('blackPieces ' + row)
-        model.input.piecesOnTheBoard.position[`${position}`] = {
+        model.input.squaresOnTheBoard.position[`${position}`] = {
             currentValue: [`<img onclick="movePiece('${position}')" class="${model.data.pieces.black[col = (col - 1)].name}" src="${model.data.pieces.black[col].src}">`],
-            pieceType: model.data.pieces.black[col = (col - 1)].name
+            letterValue: char,
+            numberValue: row,
+            pieceType: [model.data.pieces.black[col].name]
         }
     }
     else {
-        model.input.piecesOnTheBoard.position[`${position}`] = {
-            currentValue: []
+        model.input.squaresOnTheBoard.position[`${position}`] = {
+            letterValue: char,
+            numberValue: row,
+            currentValue: [],
+            pieceType: ''
         }
     }
 
 }
 
-function movePiece(element) {
-    const currentPiece = model.input.piecesOnTheBoard.position[element]
+function movePiece(currentPosition) {
+    const currentPiece = model.input.squaresOnTheBoard.position[currentPosition].pieceType
+    currentPiece[0].includes('pawn') ? movePawn(currentPosition) : '';
+
+}
+
+function movePawn(currentPosition) {
+    let pawnNumberPosition = model.input.squaresOnTheBoard.position[currentPosition].numberValue
+    let pawnLetterPosition = model.input.squaresOnTheBoard.position[currentPosition].letterValueValue
+    const pieceDetalis = model.input.squaresOnTheBoard.position[currentPosition]
+    console.log(pieceDetalis)
+    model.input.squaresOnTheBoard.position[currentPosition].currentValue = []
+    model.input.squaresOnTheBoard.position['4A'] = pieceDetalis
+    console.log(pawnNumberPosition)
 
 }
