@@ -4,26 +4,26 @@
   grid-template-rows: repeat(8, 100px);
 }
 
-.whitePiece {
+.white-piece {
   color: white;
   text-shadow: 1px 1px gray;
 }
 
-.blackPiece {
+.black-piece {
   color: black;
 }
 
-.lightSquare,
-.darkSquare {
+.light-square,
+.dark-square {
   text-align: center;
   vertical-align: middle;
 }
 
-.lightSquare {
+.light-square {
   background-color: rgb(240, 217, 181);
 }
 
-.darkSquare {
+.dark-square {
   background-color: rgb(181, 136, 99);
 }
 

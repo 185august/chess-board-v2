@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        #chessboard {
+            display: grid;
+            grid-template-columns: repeat(8, 100px);
+            grid-template-rows: repeat(8, 100px);
+        }
+
+        .whitePiece {
+            color: white;
+            text-shadow: 1px 1px gray;
+        }
+
+        .blackPiece {
+            color: black;
+        }
+
+        .lightSquare,
+        .darkSquare {
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        .lightSquare {
+            background-color: rgb(240, 217, 181);
+        }
+
+        .darkSquare {
+            background-color: rgb(181, 136, 99);
+        }
+
+        img {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<body onload="initChessBoard()">
+    <div id="chessboard">
+
+    </div>
+
+    <script>
+        // Chess Board MVC Implementation
+
+        // -------------------- MODEL --------------------
+        const ChessBoardModel = {
+            init: function () {
+                this.squaresOnTheBoard = {
+                    position: {}
+                };
+                this.createBoardPositions();
+                this.setupInitialPieces();
+                return this;
+            },
+
+            createBoardPositions: function () {
+                for (let row = 8; row > 0; row--) {
+                    for (let col = 1; col < 9; col++) {
+                        const char = String.fromCharCode(64 + col);
+                        const positionOfSquare = char + row;
+                        const squareColor = (row + col) % 2 ? 'lightSquare' : 'darkSquare';
+
+                        this.squaresOnTheBoard.position[positionOfSquare] = {
+                            squareColor: squareColor,
+                            letterValue: char,
+                            numberValue: row,
+                            pieceType: [] // Array to store piece information
+                        };
+                    }
+                }
+            },
+
+            setupInitialPieces: function () {
+                // White pieces (row 1-2)
+                const whitePieces = {
+                    'A1': 'rook', 'B1': 'knight', 'C1': 'bishop', 'D1': 'queen',
+                    'E1': 'king', 'F1': 'bishop', 'G1': 'knight', 'H1': 'rook'
+                };
+
+                // Set up pawns
+                for (let col = 1; col <= 8; col++) {
+                    const char = String.fromCharCode(64 + col);
+                    this.squaresOnTheBoard.position[char + '2'].pieceType = ['pawn', 'white'];
+                    this.squaresOnTheBoard.position[char + '7'].pieceType = ['pawn', 'black'];
+                }
+
+                // Set up other pieces
+                Object.entries(whitePieces).forEach(([pos, piece]) => {
+                    this.squaresOnTheBoard.position[pos].pieceType = [piece, 'white'];
+
+                    // Calculate corresponding black piece position
+                    const blackPos = pos[0] + '8';
+                    this.squaresOnTheBoard.position[blackPos].pieceType = [piece, 'black'];
+                });
+            },
+
+            getPieceAt: function (position) {
+                return this.squaresOnTheBoard.position[position].pieceType;
+            },
+
+            getSquareColor: function (position) {
+                return this.squaresOnTheBoard.position[position].squareColor;
+            },
+
+            getAllPositions: function () {
+                return Object.keys(this.squaresOnTheBoard.position);
+            }
+        };
+
+        // -------------------- VIEW --------------------
+        const ChessBoardView = {
+            init: function (containerId) {
+                this.boardElement = document.getElementById(containerId);
+                return this;
+            },
+
+            render: function (model) {
+                this.boardElement.innerHTML = '';
+
+                // Get all positions in the correct order (A8 to H1)
+                const positions = [];
+                for (let row = 8; row > 0; row--) {
+                    for (let col = 1; col < 9; col++) {
+                        const char = String.fromCharCode(64 + col);
+                        positions.push(char + row);
+                    }
+                }
+
+                // Create board squares
+                positions.forEach(position => {
+                    const squareColor = model.getSquareColor(position);
+                    const pieceInfo = model.getPieceAt(position);
+
+                    const squareElement = document.createElement('div');
+                    squareElement.id = position;
+                    squareElement.className = squareColor;
+
+                    if (pieceInfo && pieceInfo.length >= 2) {
+                        const [pieceType, pieceColor] = pieceInfo;
+                        squareElement.innerHTML = `<div class="piece ${pieceColor}Piece">${pieceType}</div>`;
+                    } else {
+                        squareElement.textContent = position;
+                    }
+
+                    this.boardElement.appendChild(squareElement);
+                });
+            }
+        };
+
+        // -------------------- CONTROLLER --------------------
+        const ChessBoardController = {
+            init: function (modelRef, viewRef) {
+                this.model = modelRef;
+                this.view = viewRef;
+
+                // Set up event handlers for the board
+                this.setupEventHandlers();
+
+                // Initial render
+                this.refreshBoard();
+
+                return this;
+            },
+
+            setupEventHandlers: function () {
+                // Will contain click handlers, drag-and-drop, etc.
+                this.view.boardElement.addEventListener('click', (event) => {
+                    const square = event.target.closest('div[id]');
+                    if (square) {
+                        const position = square.id;
+                        console.log(`Clicked on ${position}`);
+                        // Handle piece selection, movement, etc.
+                    }
+                });
+            },
+
+            refreshBoard: function () {
+                this.view.render(this.model);
+            }
+        };
+
+        // -------------------- INITIALIZATION --------------------
+        function initChessBoard() {
+            // Initialize each component
+            const model = ChessBoardModel.init();
+            const view = ChessBoardView.init('chessboard');
+            const controller = ChessBoardController.init(model, view);
+
+            // Return controller for possible external access
+            return controller;
+        }
+
+        // Call on page load
+        // initChessBoard();
+    </script>
+</body>
+
+</html>
