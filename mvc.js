@@ -147,21 +147,24 @@ function updatePositionsOfPieces() {
     updateView()
 }
 
-
-
-
 function selectSquare(row, column) {
     if (model.input.currentMovingPiece.piece) {
         console.log('does selectSquare run')
         canYouMovePiece(row, column,)
-    } else model.input.currentMovingPiece.piece = ''
+    } else {
+        model.input.currentMovingPiece.piece = ''
+    }
 }
 
 function selectPiece(row, column) {
     const whatSquare = row + column;
     const whatPiece = model.data.squarePositions[whatSquare].piece;
-    if (whatPiece != '') {
-        currentlySelectedPiece(whatSquare)
+    if (model.input.currentMovingPiece.piece) {
+        const oldPosition = model.input.currentMovingPiece.currentColumn + model.input.currentMovingPiece.currentRow;
+        model.data.squarePositions[oldPosition] = model.input.currentMovingPiece;
+        currentlySelectedPiece(whatSquare);
+    } else if (whatPiece != '') {
+        currentlySelectedPiece(whatSquare);
     }
 }
 
@@ -178,9 +181,10 @@ function currentlySelectedPiece(whatSquare) {
 }
 
 function canYouMovePiece(row, column) {
+    console.log("can you move piece works");
     const whatSquare = row + column;
     const currentPiece = model.input.currentMovingPiece
-    if (model.data.squarePositions[whatSquare].piece) console.log("the spot is taken");
+
     if (model.input.currentMovingPiece.piece.includes("pawn")) {
         pawnCalculations(row, column, whatSquare);
     }
