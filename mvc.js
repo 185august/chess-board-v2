@@ -26,21 +26,17 @@ const model = {
                 { name: 'black pawn', src: 'pictures/blackPawn.png' }
             ]
 
-        }
-        ,
+        },
+        squarePositions: {}
     },
     input: {
-        squaresOnTheBoard: {
-            position: {
-                squareColor: [],
-                letterValue: '',
-                numberValue: '',
-                pieceType: []
-            },
-        },
+        currentMovingPiece: {
+            numberValue: null,
+            letterValue: '',
+        }
     },
     ui: {
-        startOfGame: true,
+        isPieceSpot: false,
     }
 }
 //view 
@@ -50,117 +46,130 @@ function updateView() {
     `
     document.getElementById('app').innerHTML = html;
 }
+function initGame() {
+    makeSquarePositionsArray();
+    initializeBoard();
+    renderChessBoard();
+}
 
-function renderChessBoard() {
-    let boardHtml = '';
-    model.input.squaresOnTheBoard = {
-        position: {},
-    }
+function makeSquarePositionsArray() {
+
     for (let row = 8; row > 0; row--) {
-        let rowHtml = '';
         for (let col = 1; col < 9; col++) {
             const char = String.fromCharCode(64 + col)
-            const positionOfSquare = row + char
-            model.input.squaresOnTheBoard.position[positionOfSquare] = {
-                squareColor: [],
-                letterValue: char,
+            const position = row + char;
+            const colHtml = (row + col) % 2 ? 'light-square' : 'dark-square';
+
+            model.data.squarePositions[position] =
+            {
                 numberValue: row,
-                pieceType: []
+                letterValue: char,
+                piece: '',
+                element: `<div onclick="selectSquare(${row}, '${char}')" class="${colHtml}"><img src""></div>`,
             }
-            const colHtml = (row + col) % 2 ? 'lightSquare' : 'darkSquare'
-            startPosition(positionOfSquare)
-            model.input.squaresOnTheBoard.position.squareColor.push(`<div class="${colHtml}">
-            ${positionOfSquare}
-                        </div>`).join('');
-
         }
-
     }
-
 }
-//boardHtml += rowHtml
-//return boardHtml
-/* function renderChessPices() {
-    ${startPosition(row, col, position, char) ?? ''}
-             ${model.input.squaresOnTheBoard.position[position].currentValue.join('')}
-} */
-/* rowHtml += `<div class="${colHtml}">
-           ${positionOfSquare}
-           
-            
-                       </div>` */
-function startPosition(row, col, positionOfSquare, char) {
+function renderChessBoard() {
 
+    let html = '';
+    for (let row = 8; row > 0; row--) {
 
-    const whitePiecesRow = 1;
-    const whitePawnRow = 2;
-
-    const blackPiecesRow = 8;
-    const blackPawnRow = 7;
-    //if (model.input.squaresOnTheBoard.position[`${positionOfSquare}`].includes(7)) {
-    /*  model.input.squaresOnTheBoard.position[`${positionOfSquare}`] = {
-         currentValue: [`<img onclick="movePiece('${positionOfSquare}')" class="${model.data.pieces.black[8].name}" src="${model.data.pieces.black[8].src}">`],
-         letterValue: char,
-         numberValue: row,
-         pieceType: [model.data.pieces.black[8].name] 
+        for (let col = 1; col < 9; col++) {
+            const char = String.fromCharCode(64 + col)
+            const position = row + char
+            html += model.data.squarePositions[position].element;
         }
-         */
-
-    /*  if (row == whitePawnRow) {
-         console.log('whitepawn ' + row)
-         model.input.squaresOnTheBoard.position[`${position}`] = {
-             currentValue: [`<img onclick="movePiece('${position}')" class="${model.data.pieces.white[8].name}" src="${model.data.pieces.white[8].src}">`],
-             letterValue: char,
-             numberValue: row,
-             pieceType: [model.data.pieces.white[8].name]
-         }
-     }
-     else if (row == blackPawnRow) {
-         console.log('blackpawn ' + row)
-        
-     }
- 
-     else if (row == whitePiecesRow) {
-         console.log('whitePieces ' + row)
-         model.input.squaresOnTheBoard.position[`${position}`] = {
-             currentValue: [`<img onclick="movePiece('${position}')" class="${model.data.pieces.black[col = (col - 1)].name}" src="${model.data.pieces.white[col].src}">`],
-             letterValue: char,
-             numberValue: row,
-             pieceType: [model.data.pieces.white[col].name]
-         }
-     }
-     else if (row == blackPiecesRow) {
-         console.log('blackPieces ' + row)
-         model.input.squaresOnTheBoard.position[`${position}`] = {
-             currentValue: [`<img onclick="movePiece('${position}')" class="${model.data.pieces.black[col = (col - 1)].name}" src="${model.data.pieces.black[col].src}">`],
-             letterValue: char,
-             numberValue: row,
-             pieceType: [model.data.pieces.black[col].name]
-         }
-     }
-     else {
-         model.input.squaresOnTheBoard.position[`${position}`] = {
-             letterValue: char,
-             numberValue: row,
-             currentValue: [],
-             pieceType: ''
-         }
-     } */
+    }
+    return html
 }
 
-function movePiece(currentPosition) {
-    const currentPiece = model.input.squaresOnTheBoard.position[currentPosition].pieceType
-    currentPiece[0].includes('pawn') ? movePawn(currentPosition) : '';
 
+function initializeBoard() {
+    model.data.squarePositions['1A'].piece = 'white rook';
+    model.data.squarePositions['1B'].piece = 'white knight';
+    model.data.squarePositions['1C'].piece = 'white bishop';
+    model.data.squarePositions['1D'].piece = 'white queen';
+    model.data.squarePositions['1E'].piece = 'white king';
+    model.data.squarePositions['1F'].piece = 'white bishop';
+    model.data.squarePositions['1G'].piece = 'white knight';
+    model.data.squarePositions['1H'].piece = 'white rook';
+
+    model.data.squarePositions['8A'].piece = 'black rook';
+    model.data.squarePositions['8B'].piece = 'black knight';
+    model.data.squarePositions['8C'].piece = 'black bishop';
+    model.data.squarePositions['8D'].piece = 'black queen';
+    model.data.squarePositions['8E'].piece = 'black king';
+    model.data.squarePositions['8F'].piece = 'black bishop';
+    model.data.squarePositions['8G'].piece = 'black knight';
+    model.data.squarePositions['8H'].piece = 'black rook';
+
+    model.data.squarePositions['2A'].piece = 'white pawn';
+    model.data.squarePositions['2B'].piece = 'white pawn';
+    model.data.squarePositions['2C'].piece = 'white pawn';
+    model.data.squarePositions['2D'].piece = 'white pawn';
+    model.data.squarePositions['2E'].piece = 'white pawn';
+    model.data.squarePositions['2F'].piece = 'white pawn';
+    model.data.squarePositions['2G'].piece = 'white pawn';
+    model.data.squarePositions['2H'].piece = 'white pawn';
+
+    model.data.squarePositions['7A'].piece = 'black pawn';
+    model.data.squarePositions['7B'].piece = 'black pawn';
+    model.data.squarePositions['7C'].piece = 'black pawn';
+    model.data.squarePositions['7D'].piece = 'black pawn';
+    model.data.squarePositions['7E'].piece = 'black pawn';
+    model.data.squarePositions['7F'].piece = 'black pawn';
+    model.data.squarePositions['7G'].piece = 'black pawn';
+    model.data.squarePositions['7H'].piece = 'black pawn';
+
+    updatePieceImages();
 }
 
-function movePawn(currentPosition) {
-    let pawnNumberPosition = model.input.squaresOnTheBoard.position[currentPosition].numberValue
-    let pawnLetterPosition = model.input.squaresOnTheBoard.position[currentPosition].letterValueValue
-    const pieceDetalis = model.input.squaresOnTheBoard.position[currentPosition]
-    console.log(pieceDetalis)
-    model.input.squaresOnTheBoard.position[currentPosition].currentValue = []
-    model.input.squaresOnTheBoard.position['4A'] = pieceDetalis
-    console.log(pawnNumberPosition)
+function updatePieceImages() {
+    for (let position in model.data.squarePositions) {
+        const square = model.data.squarePositions[position];
+        let imgSrc = '';
+        if (square.piece) {
+            const color = square.piece.split(' ')[0]
+            const pieceName = square.piece
+            const whatPiece = model.data.pieces[color].find(p => p.name === pieceName)
+
+            if (whatPiece) {
+                imgSrc = whatPiece.src;
+            }
+
+        }
+        square.element = `<div onclick="selectSquare(${square.numberValue}, '${square.letterValue}')"
+            class="${(square.numberValue + square.letterValue.charCodeAt(0) - 64) % 2 ? 'light-square' : 'dark-square'}">
+            <img src="${imgSrc}">
+            </div>`
+    }
+    updateView()
+}
+
+
+
+
+function selectSquare(row, char) {
+    const whatSquare = row + char;
+
+    if (model.data.squarePositions[whatSquare].piece !== '') {
+        const whatPiece = model.data.squarePositions[whatSquare].piece;
+        if (whatPiece === 'white pawn') {
+            movePawn(whatSquare);
+            return
+        }
+    } else {
+        model.data.squarePositions[whatSquare].piece = model.input.currentMovingPiece;
+        updatePieceImages();
+        model.input.currentMovingPiece = '';
+    }
+}
+
+function movePawn(whatSquare) {
+    model.input.currentMovingPiece = model.data.squarePositions[whatSquare].piece
+    model.data.squarePositions[whatSquare].piece = '';
+    console.log(model.input.currentMovingPiece)
+
 
 }
