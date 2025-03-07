@@ -30,15 +30,7 @@ const model = {
         squarePositions: {}
     },
     input: {
-        squaresOnTheBoard: {
-            position: {
-                currentValue: [],
-                letterValue: '',
-                numberValue: '',
-                pieceType: []
-            },
-        },
-        currentPiece: {
+        currentMovingPiece: {
             numberValue: null,
             letterValue: '',
         }
@@ -160,20 +152,25 @@ function updatePieceImages() {
 
 
 function selectSquare(row, char) {
-    const whatSquare = row + char
+    const whatSquare = row + char;
 
     if (model.data.squarePositions[whatSquare].piece !== '') {
-        const whatPiece = model.data.squarePositions[whatSquare].piece
+        const whatPiece = model.data.squarePositions[whatSquare].piece;
         if (whatPiece === 'white pawn') {
-            movePawn(whatSquare)
+            movePawn(whatSquare);
+            return
         }
+    } else {
+        model.data.squarePositions[whatSquare].piece = model.input.currentMovingPiece;
+        updatePieceImages();
+        model.input.currentMovingPiece = '';
     }
-    /* const currentPiece = model.input.squaresOnTheBoard.position[currentPosition].pieceType
-    currentPiece[0].includes('pawn') ? movePawn(currentPosition) : ''; */
-
 }
 
 function movePawn(whatSquare) {
-    console.log(whatSquare)
+    model.input.currentMovingPiece = model.data.squarePositions[whatSquare].piece
+    model.data.squarePositions[whatSquare].piece = '';
+    console.log(model.currentMovingPiece)
+
 
 }
