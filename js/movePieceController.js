@@ -1,3 +1,8 @@
+function isCurrentPlayerPiece(piece) {
+    const currentPlayer = model.input.currentRound % 2 === 0 ? 'white' : 'black';
+    return piece.split(' ')[0] === currentPlayer;
+}
+
 
 function selectSquare(row, column) {
     if (model.input.currentlyAvailableMoves.anyMoves) {
@@ -20,10 +25,18 @@ function selectSquare(row, column) {
 function selectPiece(row, column) {
     const whatSquare = row + column;
     const whatPiece = model.data.squarePositions[whatSquare].piece.split(' ');
-    clearAvailableMoveClasses();
+    // Can the user capture
+    if (model.input.currentlyAvailableMoves.anyMoves == true && whatPiece[0] != model.input.currentMovingPiece.piece.split(' ')[0]) {
 
+        movePieceToNewPosition(row, column);
+    }
+
+    if (!isCurrentPlayerPiece(model.data.squarePositions[whatSquare].piece)) {
+        return
+    }
     // If there's already a piece selected
-    if (model.input.currentMovingPiece.piece) {
+    clearAvailableMoveClasses();
+    if (model.input.currentMovingPiece.piece.split(' ')[0] === whatPiece[0]) {
         const oldSquare = model.input.currentMovingPiece.currentRow + model.input.currentMovingPiece.currentColumn;
 
         model.data.squarePositions[oldSquare].piece = model.input.currentMovingPiece.piece;
@@ -40,7 +53,7 @@ function selectPiece(row, column) {
                 anyMoves: false,
                 diagonally: [],
                 orthogonally: [],
-                vertically: [],
+                pawnMove: [],
                 knightMoves: [],
             };
             updatePositionsOfPieces();
@@ -62,7 +75,7 @@ function currentlySelectedPiece(row, column, whatSquare, whatPiece) {
         anyMoves: false,
         diagonally: [],
         orthogonally: [],
-        vertically: [],
+        pawnMove: [],
         knightMoves: [],
     };
     hasMoves = false;
@@ -88,6 +101,7 @@ function currentlySelectedPiece(row, column, whatSquare, whatPiece) {
             const kingOrthogonallyMoves = canMoveOrthogonally(row, column, 1, whatPiece, whatSquare);
             const kingDiagonallyMoves = canMoveDiagonally(row, column, 1, whatPiece, whatSquare);
             hasMoves = kingOrthogonallyMoves || kingDiagonallyMoves;
+            break;
         case 'rook':
             hasMoves = canMoveOrthogonally(row, column, 7, whatPiece, whatSquare);
             break;
@@ -104,7 +118,7 @@ function movePieceToNewPosition(row, column) {
     if (newMove.orthogonally.includes(newSquare) ||
         newMove.diagonally.includes(newSquare) ||
         newMove.knightMoves.includes(newSquare) ||
-        newMove.vertically.includes(newSquare)) {
+        newMove.pawnMove.includes(newSquare)) {
         model.input.currentRound++;
         const oldPosition = model.input.currentMovingPiece.currentRow + model.input.currentMovingPiece.currentColumn;
         model.data.squarePositions[oldPosition].piece = '';
@@ -122,7 +136,7 @@ function movePieceToNewPosition(row, column) {
             anyMoves: false,
             diagonally: [],
             orthogonally: [],
-            vertically: [],
+            pawnMove: [],
             knightMoves: [],
         }
     }
@@ -132,6 +146,7 @@ function clearAvailableMoveClasses() {
     const availableMoves = document.querySelectorAll('.available-move');
     availableMoves.forEach(move => {
         move.classList.remove('available-move');
+        move.classList.remove('available-move-attack')
     });
     updatePositionsOfPieces();
 }

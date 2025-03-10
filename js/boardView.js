@@ -90,7 +90,6 @@ function updatePositionsOfPieces() {
             const color = square.piece.split(' ')[0]
             const pieceName = square.piece
             const whatPiece = model.data.pieces[color].find(p => p.name === pieceName)
-
             if (whatPiece) {
                 imgSrc = whatPiece.src;
             }

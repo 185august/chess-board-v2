@@ -38,10 +38,11 @@ const model = {
             anyMoves: false,
             diagonally: [],
             orthogonally: [],
-            vertically: [],
+            pawnMoves: [],
             knightMoves: [],
         },
         currentRound: 0,
+        whichUserTurn: null
 
     },
     ui: {

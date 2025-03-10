@@ -4,6 +4,9 @@ function canMoveDiagonally(row, column, maxDistance = 7, whatPiece, whatSquare) 
     moves.diagonally = []
     const OriginalPiece = model.data.squarePositions[whatSquare].piece
 
+    const opponentColor = model.input.currentRound % 2 === 1 ? 'white' : 'black'
+    console.log(opponentColor)
+
     model.data.squarePositions[whatSquare].piece = '';
     const directions = [
         { rowDelta: -1, columnDelta: 1 },// down-right
@@ -13,19 +16,26 @@ function canMoveDiagonally(row, column, maxDistance = 7, whatPiece, whatSquare) 
     ]
 
     for (const dir of directions) {
-        for (let i = 1; i < maxDistance; i++) {
+        let attackPerDirection = 0;
+        for (let i = 1; i <= maxDistance; i++) {
             const newRow = row + (dir.rowDelta * i);
             const newColumn = String.fromCharCode(column.charCodeAt(0) + (dir.columnDelta * i));
             //check if the position is on the board
             if (newRow >= 1 && newRow <= 8 && newColumn >= 'A' && newColumn <= 'H') {
                 const position = newRow + newColumn;
 
-                if (!model.data.squarePositions[position].piece) {
-                    moves.diagonally.push(position)
-
-                }
-                //square taken
-                else {
+                if (model.data.squarePositions[position].piece.split(' ')[0] === opponentColor) {
+                    if (attackPerDirection >= 1) {
+                        break;
+                    }
+                    moves.diagonally.push(position);
+                    attackPerDirection++;
+                } else if (!model.data.squarePositions[position].piece) {
+                    if (attackPerDirection >= 1) {
+                        break;
+                    }
+                    moves.diagonally.push(position);
+                } else {
                     break;
                 }
                 //square is not on board
@@ -38,6 +48,11 @@ function canMoveDiagonally(row, column, maxDistance = 7, whatPiece, whatSquare) 
 
     for (const move of moves.diagonally) {
         const element = document.querySelector(`#square_${move}`);
+        if (model.data.squarePositions[move].piece.split(' ')[0] === opponentColor) {
+            if (element) {
+                element.classList.add('available-move-attack');
+            }
+        }
         if (element) {
             element.classList.add('available-move');
         }
@@ -51,6 +66,7 @@ function canMoveOrthogonally(row, column, maxDistance = 7, whatPiece, whatSquare
     const moves = model.input.currentlyAvailableMoves
     moves.orthogonally = []
 
+    const opponentColor = model.input.currentRound % 2 === 1 ? 'white' : 'black'
     const OriginalPiece = model.data.squarePositions[whatSquare].piece
     model.data.squarePositions[whatSquare].piece = '';
 
@@ -61,13 +77,24 @@ function canMoveOrthogonally(row, column, maxDistance = 7, whatPiece, whatSquare
         { rowDelta: 0, columnDelta: 1 },
     ]
     for (const dir of directions) {
+        let attackPerDirection = 0;
         for (let i = 1; i <= maxDistance; i++) {
             const newRow = row + (dir.rowDelta * i)
             const newColumn = String.fromCharCode(column.charCodeAt(0) + (dir.columnDelta * i));
 
             if (newRow >= 1 && newRow <= 8 && newColumn >= "A" && newColumn <= "H") {
                 const position = newRow + newColumn;
-                if (!model.data.squarePositions[position].piece) {
+                console.log(attackPerDirection)
+                if (model.data.squarePositions[position].piece.split(' ')[0] === opponentColor) {
+                    if (attackPerDirection >= 1) {
+                        break;
+                    }
+                    moves.orthogonally.push(position);
+                    attackPerDirection++
+                } else if (!model.data.squarePositions[position].piece) {
+                    if (attackPerDirection >= 1) {
+                        break;
+                    }
                     moves.orthogonally.push(position);
                 } else {
                     break;
@@ -81,6 +108,11 @@ function canMoveOrthogonally(row, column, maxDistance = 7, whatPiece, whatSquare
 
     for (const move of moves.orthogonally) {
         const element = document.querySelector(`#square_${move}`)
+        if (model.data.squarePositions[move].piece.split(' ')[0] === opponentColor) {
+            if (element) {
+                element.classList.add('available-move-attack');
+            }
+        }
         if (element) {
             element.classList.add('available-move')
         }
@@ -91,23 +123,29 @@ function canMoveOrthogonally(row, column, maxDistance = 7, whatPiece, whatSquare
 function canMovePawn(row, column, maxDistance = 2, whatPiece, whatSquare) {
 
     const moves = model.input.currentlyAvailableMoves
-    moves.vertically = []
+    moves.pawnMove = []
 
+    const opponentColor = model.input.currentRound % 2 === 1 ? 'white' : 'black'
     const OriginalPiece = model.data.squarePositions[whatSquare].piece
     model.data.squarePositions[whatSquare].piece = '';
-
-    let directions = [
-        { rowDelta: -1, columnDelta: 0 },
-        { rowDelta: 1, columnDelta: 0 },
-    ]
+    let directions = []
+    let attackDirection = []
 
     if (whatPiece[0] == 'black') {
         directions = [
-            directions[0]
+            { rowDelta: -1, columnDelta: 0 },
+        ]
+        attackDirection = [
+            { rowDeltaAttack: -1, columnDeltaAttack: -1 },
+            { rowDeltaAttack: -1, columnDeltaAttack: 1 },
         ]
     } else {
         directions = [
-            directions[1]
+            { rowDelta: 1, columnDelta: 0 },
+        ]
+        attackDirection = [
+            { rowDeltaAttack: 1, columnDeltaAttack: -1 },
+            { rowDeltaAttack: 1, columnDeltaAttack: 1 },
         ]
     }
     for (const dir of directions) {
@@ -117,8 +155,9 @@ function canMovePawn(row, column, maxDistance = 2, whatPiece, whatSquare) {
 
             if (newRow >= 1 && newRow <= 8 && newColumn >= "A" && newColumn <= "H") {
                 const position = newRow + newColumn;
+
                 if (!model.data.squarePositions[position].piece) {
-                    moves.vertically.push(position);
+                    moves.pawnMove.push(position);
                 } else {
                     break;
                 }
@@ -127,15 +166,32 @@ function canMovePawn(row, column, maxDistance = 2, whatPiece, whatSquare) {
             }
         }
     }
+    for (const dir of attackDirection) {
+        for (let i = 0; i <= 2; i++) {
+            const newRow = row + (dir.rowDeltaAttack)
+            const newColumn = String.fromCharCode(column.charCodeAt(0) + (dir.columnDeltaAttack));
+            if (newRow >= 1 && newRow <= 8 && newColumn >= "A" && newColumn <= "H") {
+                const position = newRow + newColumn;
+                if (model.data.squarePositions[position].piece.split(' ')[0] === opponentColor) {
+                    moves.pawnMove.push(position);
+                }
+            }
+        }
+    }
     model.data.squarePositions[whatSquare].piece = OriginalPiece
 
-    for (const move of moves.vertically) {
+    for (const move of moves.pawnMove) {
         const element = document.querySelector(`#square_${move}`)
+        if (model.data.squarePositions[move].piece.split(' ')[0] === opponentColor) {
+            if (element) {
+                element.classList.add('available-move-attack');
+            }
+        }
         if (element) {
             element.classList.add('available-move')
         }
     }
-    moves.anyMoves = moves.vertically.length > 0
+    moves.anyMoves = moves.pawnMove.length > 0
     return moves.anyMoves
 }
 
@@ -143,6 +199,8 @@ function canMoveKnight(row, column, maxDistance = 1, whatPiece, whatSquare,) {
 
     const moves = model.input.currentlyAvailableMoves
     moves.knightMoves = [];
+
+    const opponentColor = model.input.currentRound % 2 === 1 ? 'white' : 'black'
     const OriginalPiece = model.data.squarePositions[whatSquare].piece
     model.data.squarePositions[whatSquare].piece = '';
 
@@ -162,7 +220,10 @@ function canMoveKnight(row, column, maxDistance = 1, whatPiece, whatSquare,) {
 
         if (newRow >= 1 && newRow <= 8 && newColumn >= "A" && newColumn <= "H") {
             const position = newRow + newColumn;
-            if (!model.data.squarePositions[position].piece) {
+            if (model.data.squarePositions[position].piece.split(' ')[0] === opponentColor) {
+                moves.knightMoves.push(position);
+            }
+            if (whatPiece[0] != model.data.squarePositions[position].piece.split(' ')[0]) {
                 moves.knightMoves.push(position);
             }
         }
@@ -170,12 +231,23 @@ function canMoveKnight(row, column, maxDistance = 1, whatPiece, whatSquare,) {
     model.data.squarePositions[whatSquare].piece = OriginalPiece;
     for (const move of moves.knightMoves) {
         const element = document.querySelector(`#square_${move}`)
+        if (model.data.squarePositions[move].piece.split(' ')[0] === opponentColor) {
+            if (element) {
+                element.classList.add('available-move-attack');
+            }
+        }
         if (element) {
             element.classList.add('available-move')
         }
     }
     moves.anyMoves = moves.knightMoves.length > 0
     return moves.anyMoves
+}
+
+function isTheKingInDirectDanger() {
+    for (let position in model.data.squarePositions) {
+        console.log(position)
+    }
 }
 
 
