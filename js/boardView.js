@@ -1,46 +1,3 @@
-// model
-const model = {
-    data: {
-        pieces: {
-            white: [
-                { name: 'white rook', src: 'pictures/whiteRook.png' },
-                { name: 'white bishop', src: 'pictures/whiteBishop.png' },
-                { name: 'white knight', src: 'pictures/whiteKnight.png' },
-                { name: 'white queen', src: 'pictures/whiteQueen.png' },
-                { name: 'white king', src: 'pictures/whiteKing.png' },
-                { name: 'white knight', src: 'pictures/whiteKnight.png' },
-                { name: 'white bishop', src: 'pictures/whiteBishop.png' },
-                { name: 'white rook', src: 'pictures/whiteRook.png' },
-                { name: 'white pawn', src: 'pictures/whitePawn.png' }
-
-            ],
-            black: [
-                { name: 'black rook', src: 'pictures/blackRook.png' },
-                { name: 'black bishop', src: 'pictures/blackBishop.png' },
-                { name: 'black knight', src: 'pictures/blackKnight.png' },
-                { name: 'black queen', src: 'pictures/blackQueen.png' },
-                { name: 'black king', src: 'pictures/blackKing.png' },
-                { name: 'black knight', src: 'pictures/blackKnight.png' },
-                { name: 'black bishop', src: 'pictures/blackBishop.png' },
-                { name: 'black rook', src: 'pictures/blackRook.png' },
-                { name: 'black pawn', src: 'pictures/blackPawn.png' }
-            ]
-
-        },
-        squarePositions: {}
-    },
-    input: {
-        currentMovingPiece: {
-            piece: '',
-            currentColumn: null,
-            currentRow: null,
-        }
-    },
-    ui: {
-        isPieceSpot: false,
-    }
-}
-//view 
 function updateView() {
     let html = `
     ${renderChessBoard()}
@@ -140,56 +97,10 @@ function updatePositionsOfPieces() {
         }
         square.element = `<div onclick="${square.piece ? `selectPiece(${square.currentRow}, '${square.currentColumn}')` :
             `selectSquare(${square.currentRow}, '${square.currentColumn}')`}"
-            class="${(square.currentRow + square.currentColumn.charCodeAt(0) - 64) % 2 ? 'light-square' : 'dark-square'}">${position}
+            class="${(square.currentRow + square.currentColumn.charCodeAt(0) - 64) % 2 ? 'light-square' : 'dark-square'} " >${position}
+            <div id="square_${(square.currentRow + square.currentColumn)}"></div>
             <img src="${imgSrc}">
             </div>`
     }
     updateView()
-}
-
-function selectSquare(row, column) {
-    if (model.input.currentMovingPiece.piece) {
-        console.log('does selectSquare run')
-        canYouMovePiece(row, column,)
-    } else {
-        model.input.currentMovingPiece.piece = ''
-    }
-}
-
-function selectPiece(row, column) {
-    const whatSquare = row + column;
-    const whatPiece = model.data.squarePositions[whatSquare].piece;
-    if (model.input.currentMovingPiece.piece) {
-        const oldPosition = model.input.currentMovingPiece.currentColumn + model.input.currentMovingPiece.currentRow;
-        model.data.squarePositions[oldPosition] = model.input.currentMovingPiece;
-        currentlySelectedPiece(whatSquare);
-    } else if (whatPiece != '') {
-        currentlySelectedPiece(whatSquare);
-    }
-}
-
-function currentlySelectedPiece(whatSquare) {
-    if (!model.input.currentMovingPiece.piece) {
-        model.input.currentMovingPiece = {
-            piece: model.data.squarePositions[whatSquare].piece,
-            currentColumn: model.data.squarePositions[whatSquare].currentColumn,
-            currentRow: model.data.squarePositions[whatSquare].currentRow
-        }
-        model.data.squarePositions[whatSquare].piece = '';
-        console.log(model.input.currentMovingPiece.piece);
-    }
-}
-
-function canYouMovePiece(row, column) {
-    console.log("can you move piece works");
-    const whatSquare = row + column;
-    const currentPiece = model.input.currentMovingPiece
-
-    if (model.input.currentMovingPiece.piece.includes("pawn")) {
-        pawnCalculations(row, column, whatSquare);
-    }
-    if (model.input.currentMovingPiece.piece.includes("knight")) {
-        moveKnightCalculation(row, column, whatSquare);
-    }
-
 }

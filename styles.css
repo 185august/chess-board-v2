@@ -27,6 +27,14 @@
   background-color: rgb(181, 136, 99);
 }
 
-img {
-  margin-top: 20px;
+.available-move {
+  content: "";
+  position: absolute;
+  margin-left: 36px;
+  margin-top: 12px;
+  width: 30px;
+  height: 30px;
+  background-color: rgba(0, 0, 0, 0.3);
+  border-radius: 50%;
+  z-index: 5;
 }
