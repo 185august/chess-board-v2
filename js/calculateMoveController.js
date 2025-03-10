@@ -244,10 +244,26 @@ function canMoveKnight(row, column, maxDistance = 1, whatPiece, whatSquare,) {
     return moves.anyMoves
 }
 
-function isTheKingInDirectDanger() {
-    for (let position in model.data.squarePositions) {
-        console.log(position)
+function findKings() {
+    const whiteKingPosition = findKingByColor('white');
+    const blackKingPosition = findKingByColor('black');
+    if (!whiteKingPosition || !blackKingPosition) {
+        console.log(model.input.currentRound % 2 === 0 ? 'white' : 'white' + ' has won')
     }
+
+    return {
+        white: whiteKingPosition,
+        black: blackKingPosition
+    };
+}
+
+function findKingByColor(color) {
+    for (const position in model.data.squarePositions) {
+        if (model.data.squarePositions[position].piece === `${color} king`) {
+            return position;
+        }
+    }
+    return null;
 }
 
 

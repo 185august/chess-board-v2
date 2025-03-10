@@ -27,7 +27,6 @@ function selectPiece(row, column) {
     const whatPiece = model.data.squarePositions[whatSquare].piece.split(' ');
     // Can the user capture
     if (model.input.currentlyAvailableMoves.anyMoves == true && whatPiece[0] != model.input.currentMovingPiece.piece.split(' ')[0]) {
-
         movePieceToNewPosition(row, column);
     }
 
@@ -140,6 +139,27 @@ function movePieceToNewPosition(row, column) {
             knightMoves: [],
         }
     }
+}
+function findKingByColor(color) {
+    for (const position in model.data.squarePositions) {
+        if (model.data.squarePositions[position].piece === `${color} king`) {
+            return position;
+        }
+    }
+    return null;
+}
+
+function findKings() {
+    const whiteKingPosition = findKingByColor('white');
+    const blackKingPosition = findKingByColor('black');
+    if (!whiteKingPosition || !blackKingPosition) {
+        console.log(model.input.currentRound % 2 === 0 ? 'white' : 'white' + ' has won')
+    }
+
+    return {
+        white: whiteKingPosition,
+        black: blackKingPosition
+    };
 }
 
 function clearAvailableMoveClasses() {
