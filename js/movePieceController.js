@@ -1,6 +1,5 @@
 
 function selectSquare(row, column) {
-    const whatSquare = row + column;
     if (model.input.currentlyAvailableMoves.anyMoves) {
         movePieceToNewPosition(row, column);
     } else {
