@@ -31,10 +31,13 @@
   content: "";
   position: absolute;
   margin-left: 36px;
-  margin-top: 12px;
+  margin-top: 35px;
   width: 30px;
   height: 30px;
   background-color: rgba(0, 0, 0, 0.3);
   border-radius: 50%;
   z-index: 5;
+}
+img {
+  margin-top: 15px;
 }

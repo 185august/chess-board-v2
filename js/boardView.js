@@ -97,7 +97,7 @@ function updatePositionsOfPieces() {
         }
         square.element = `<div onclick="${square.piece ? `selectPiece(${square.currentRow}, '${square.currentColumn}')` :
             `selectSquare(${square.currentRow}, '${square.currentColumn}')`}"
-            class="${(square.currentRow + square.currentColumn.charCodeAt(0) - 64) % 2 ? 'light-square' : 'dark-square'} " >${position}
+            class="${(square.currentRow + square.currentColumn.charCodeAt(0) - 64) % 2 ? 'light-square' : 'dark-square'} " >
             <div id="square_${(square.currentRow + square.currentColumn)}"></div>
             <img src="${imgSrc}">
             </div>`
