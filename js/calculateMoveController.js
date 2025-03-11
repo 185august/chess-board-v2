@@ -1,11 +1,8 @@
-function canMoveDiagonally(row, column, maxDistance = 7, whatPiece, whatSquare) {
+function canMoveDiagonally(row, column, maxDistance = 7, whatPiece, whatSquare, opponentColor) {
 
     const moves = model.input.currentlyAvailableMoves
     moves.diagonally = []
     const OriginalPiece = model.data.squarePositions[whatSquare].piece
-
-    const opponentColor = model.input.currentRound % 2 === 1 ? 'white' : 'black'
-    console.log(opponentColor)
 
     model.data.squarePositions[whatSquare].piece = '';
     const directions = [
@@ -23,7 +20,6 @@ function canMoveDiagonally(row, column, maxDistance = 7, whatPiece, whatSquare) 
             //check if the position is on the board
             if (newRow >= 1 && newRow <= 8 && newColumn >= 'A' && newColumn <= 'H') {
                 const position = newRow + newColumn;
-
                 if (model.data.squarePositions[position].piece.split(' ')[0] === opponentColor) {
                     if (attackPerDirection >= 1) {
                         break;
@@ -46,27 +42,27 @@ function canMoveDiagonally(row, column, maxDistance = 7, whatPiece, whatSquare) 
     }
     model.data.squarePositions[whatSquare].piece = OriginalPiece
 
-    for (const move of moves.diagonally) {
-        const element = document.querySelector(`#square_${move}`);
-        if (model.data.squarePositions[move].piece.split(' ')[0] === opponentColor) {
-            if (element) {
-                element.classList.add('available-move-attack');
+    if (!model.input.checkingIfKingIsInDanger) {
+        for (const move of moves.diagonally) {
+            const element = document.querySelector(`#square_${move}`);
+            if (model.data.squarePositions[move].piece.split(' ')[0] === opponentColor) {
+                if (element) {
+                    element.classList.add('available-move-attack');
+                }
             }
-        }
-        if (element) {
-            element.classList.add('available-move');
+            if (element) {
+                element.classList.add('available-move');
+            }
         }
     }
     moves.anyMoves = moves.diagonally.length > 0;
     return moves.anyMoves;
 }
 
-function canMoveOrthogonally(row, column, maxDistance = 7, whatPiece, whatSquare) {
+function canMoveOrthogonally(row, column, maxDistance = 7, whatPiece, whatSquare, opponentColor) {
 
     const moves = model.input.currentlyAvailableMoves
     moves.orthogonally = []
-
-    const opponentColor = model.input.currentRound % 2 === 1 ? 'white' : 'black'
     const OriginalPiece = model.data.squarePositions[whatSquare].piece
     model.data.squarePositions[whatSquare].piece = '';
 
@@ -84,7 +80,6 @@ function canMoveOrthogonally(row, column, maxDistance = 7, whatPiece, whatSquare
 
             if (newRow >= 1 && newRow <= 8 && newColumn >= "A" && newColumn <= "H") {
                 const position = newRow + newColumn;
-                console.log(attackPerDirection)
                 if (model.data.squarePositions[position].piece.split(' ')[0] === opponentColor) {
                     if (attackPerDirection >= 1) {
                         break;
@@ -106,26 +101,27 @@ function canMoveOrthogonally(row, column, maxDistance = 7, whatPiece, whatSquare
     }
     model.data.squarePositions[whatSquare].piece = OriginalPiece
 
-    for (const move of moves.orthogonally) {
-        const element = document.querySelector(`#square_${move}`)
-        if (model.data.squarePositions[move].piece.split(' ')[0] === opponentColor) {
-            if (element) {
-                element.classList.add('available-move-attack');
+    if (!model.input.checkingIfKingIsInDanger) {
+        for (const move of moves.orthogonally) {
+            const element = document.querySelector(`#square_${move}`)
+            if (model.data.squarePositions[move].piece.split(' ')[0] === opponentColor) {
+                if (element) {
+                    element.classList.add('available-move-attack');
+                }
             }
-        }
-        if (element) {
-            element.classList.add('available-move')
+            if (element) {
+                element.classList.add('available-move')
+            }
         }
     }
     moves.anyMoves = moves.orthogonally.length > 0;
     return moves.anyMoves
 }
-function canMovePawn(row, column, maxDistance = 2, whatPiece, whatSquare) {
+function canMovePawn(row, column, maxDistance = 2, whatPiece, whatSquare, opponentColor) {
 
     const moves = model.input.currentlyAvailableMoves
-    moves.pawnMove = []
+    moves.pawnMoves = []
 
-    const opponentColor = model.input.currentRound % 2 === 1 ? 'white' : 'black'
     const OriginalPiece = model.data.squarePositions[whatSquare].piece
     model.data.squarePositions[whatSquare].piece = '';
     let directions = []
@@ -157,7 +153,8 @@ function canMovePawn(row, column, maxDistance = 2, whatPiece, whatSquare) {
                 const position = newRow + newColumn;
 
                 if (!model.data.squarePositions[position].piece) {
-                    moves.pawnMove.push(position);
+                    moves.pawnMoves.push(position);
+
                 } else {
                     break;
                 }
@@ -173,34 +170,35 @@ function canMovePawn(row, column, maxDistance = 2, whatPiece, whatSquare) {
             if (newRow >= 1 && newRow <= 8 && newColumn >= "A" && newColumn <= "H") {
                 const position = newRow + newColumn;
                 if (model.data.squarePositions[position].piece.split(' ')[0] === opponentColor) {
-                    moves.pawnMove.push(position);
+                    moves.pawnMoves.push(position);
                 }
             }
         }
     }
     model.data.squarePositions[whatSquare].piece = OriginalPiece
 
-    for (const move of moves.pawnMove) {
-        const element = document.querySelector(`#square_${move}`)
-        if (model.data.squarePositions[move].piece.split(' ')[0] === opponentColor) {
+    if (!model.input.checkingIfKingIsInDanger) {
+        for (const move of moves.pawnMoves) {
+            const element = document.querySelector(`#square_${move}`)
+            if (model.data.squarePositions[move].piece.split(' ')[0] === opponentColor) {
+                if (element) {
+                    element.classList.add('available-move-attack');
+                }
+            }
             if (element) {
-                element.classList.add('available-move-attack');
+                element.classList.add('available-move')
             }
         }
-        if (element) {
-            element.classList.add('available-move')
-        }
     }
-    moves.anyMoves = moves.pawnMove.length > 0
+    moves.anyMoves = moves.pawnMoves.length > 0
     return moves.anyMoves
 }
 
-function canMoveKnight(row, column, maxDistance = 1, whatPiece, whatSquare,) {
+function canMoveKnight(row, column, maxDistance = 1, whatPiece, whatSquare, opponentColor) {
 
     const moves = model.input.currentlyAvailableMoves
     moves.knightMoves = [];
 
-    const opponentColor = model.input.currentRound % 2 === 1 ? 'white' : 'black'
     const OriginalPiece = model.data.squarePositions[whatSquare].piece
     model.data.squarePositions[whatSquare].piece = '';
 
@@ -229,42 +227,25 @@ function canMoveKnight(row, column, maxDistance = 1, whatPiece, whatSquare,) {
         }
     }
     model.data.squarePositions[whatSquare].piece = OriginalPiece;
-    for (const move of moves.knightMoves) {
-        const element = document.querySelector(`#square_${move}`)
-        if (model.data.squarePositions[move].piece.split(' ')[0] === opponentColor) {
-            if (element) {
-                element.classList.add('available-move-attack');
+
+    if (!model.input.checkingIfKingIsInDanger) {
+        for (const move of moves.knightMoves) {
+            const element = document.querySelector(`#square_${move}`)
+            if (model.data.squarePositions[move].piece.split(' ')[0] === opponentColor) {
+                if (element) {
+                    element.classList.add('available-move-attack');
+                }
             }
-        }
-        if (element) {
-            element.classList.add('available-move')
+            if (element) {
+                element.classList.add('available-move')
+            }
         }
     }
     moves.anyMoves = moves.knightMoves.length > 0
     return moves.anyMoves
 }
 
-function findKings() {
-    const whiteKingPosition = findKingByColor('white');
-    const blackKingPosition = findKingByColor('black');
-    if (!whiteKingPosition || !blackKingPosition) {
-        console.log(model.input.currentRound % 2 === 0 ? 'white' : 'white' + ' has won')
-    }
 
-    return {
-        white: whiteKingPosition,
-        black: blackKingPosition
-    };
-}
-
-function findKingByColor(color) {
-    for (const position in model.data.squarePositions) {
-        if (model.data.squarePositions[position].piece === `${color} king`) {
-            return position;
-        }
-    }
-    return null;
-}
 
 
 

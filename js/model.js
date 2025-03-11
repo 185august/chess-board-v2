@@ -42,7 +42,9 @@ const model = {
             knightMoves: [],
         },
         currentRound: 0,
-        whichUserTurn: null
+        whichUserTurn: null,
+        checkingIfKingIsInDanger: false,
+        gameText: null,
 
     },
     ui: {

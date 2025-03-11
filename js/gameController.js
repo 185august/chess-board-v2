@@ -78,34 +78,35 @@ function currentlySelectedPiece(row, column, whatSquare, whatPiece) {
         knightMoves: [],
     };
     hasMoves = false;
+    const opponentColor = model.input.currentRound % 2 === 1 ? 'white' : 'black'
 
     switch (whatPiece[1]) {
         case 'bishop':
-            hasMoves = canMoveDiagonally(row, column, 7, whatPiece, whatSquare);
+            hasMoves = canMoveDiagonally(row, column, 7, whatPiece, whatSquare, opponentColor);
             break;
         case 'pawn':
             if (model.input.currentRound <= 1) {
-                hasMoves = canMovePawn(row, column, 2, whatPiece, whatSquare);
+                hasMoves = canMovePawn(row, column, 2, whatPiece, whatSquare, opponentColor);
                 break;
             } else {
-                hasMoves = canMovePawn(row, column, 1, whatPiece, whatSquare)
+                hasMoves = canMovePawn(row, column, 1, whatPiece, whatSquare, opponentColor)
                 break;
             }
         case 'queen':
-            const queenOrthogonallyMoves = canMoveOrthogonally(row, column, 7, whatPiece, whatSquare);
-            const queenDiagonallyMoves = canMoveDiagonally(row, column, 7, whatPiece, whatSquare);
+            const queenOrthogonallyMoves = canMoveOrthogonally(row, column, 7, whatPiece, whatSquare, opponentColor);
+            const queenDiagonallyMoves = canMoveDiagonally(row, column, 7, whatPiece, whatSquare, opponentColor);
             hasMoves = queenOrthogonallyMoves || queenDiagonallyMoves;
             break;
         case 'king':
-            const kingOrthogonallyMoves = canMoveOrthogonally(row, column, 1, whatPiece, whatSquare);
-            const kingDiagonallyMoves = canMoveDiagonally(row, column, 1, whatPiece, whatSquare);
+            const kingOrthogonallyMoves = canMoveOrthogonally(row, column, 1, whatPiece, whatSquare, opponentColor);
+            const kingDiagonallyMoves = canMoveDiagonally(row, column, 1, whatPiece, whatSquare, opponentColor);
             hasMoves = kingOrthogonallyMoves || kingDiagonallyMoves;
             break;
         case 'rook':
-            hasMoves = canMoveOrthogonally(row, column, 7, whatPiece, whatSquare);
+            hasMoves = canMoveOrthogonally(row, column, 7, whatPiece, whatSquare, opponentColor);
             break;
         case 'knight':
-            hasMoves = canMoveKnight(row, column, 1, whatPiece, whatSquare);
+            hasMoves = canMoveKnight(row, column, 1, whatPiece, whatSquare, opponentColor);
             break;
     }
     model.input.currentlyAvailableMoves.anyMoves = hasMoves;
@@ -114,10 +115,12 @@ function currentlySelectedPiece(row, column, whatSquare, whatPiece) {
 function movePieceToNewPosition(row, column) {
     const newSquare = (row + column);
     const newMove = model.input.currentlyAvailableMoves
+
     if (newMove.orthogonally.includes(newSquare) ||
         newMove.diagonally.includes(newSquare) ||
         newMove.knightMoves.includes(newSquare) ||
-        newMove.pawnMove.includes(newSquare)) {
+        newMove.pawnMoves.includes(newSquare)) {
+
         model.input.currentRound++;
         const oldPosition = model.input.currentMovingPiece.currentRow + model.input.currentMovingPiece.currentColumn;
         model.data.squarePositions[oldPosition].piece = '';
@@ -137,7 +140,16 @@ function movePieceToNewPosition(row, column) {
             orthogonally: [],
             pawnMove: [],
             knightMoves: [],
+        };
+        if (isTheKingInDanger()) {
+            model.input.gameText = 'The ' + (model.input.currentRound % 2 === 0 ? 'white' : 'black') + ' king is in danger'
+            updateView();
+        } else {
+            model.input.gameText = null
+            updateView();
         }
+        findKings();
+
     }
 }
 function findKingByColor(color) {
@@ -152,14 +164,109 @@ function findKingByColor(color) {
 function findKings() {
     const whiteKingPosition = findKingByColor('white');
     const blackKingPosition = findKingByColor('black');
+
     if (!whiteKingPosition || !blackKingPosition) {
-        console.log(model.input.currentRound % 2 === 0 ? 'white' : 'white' + ' has won')
+        model.input.gameText = (!whiteKingPosition ? 'black has won' : 'white has won')
+        updateView();
     }
 
     return {
         white: whiteKingPosition,
         black: blackKingPosition
     };
+}
+
+function isTheKingInDanger() {
+    model.input.checkingIfKingIsInDanger = true;
+    const currentPlayerColor = model.input.currentRound % 2 === 0 ? 'white' : 'black'
+    const opponentColor = currentPlayerColor === 'white' ? 'black' : 'white';
+
+    const kingPosition = findKingByColor(currentPlayerColor)
+
+    if (!kingPosition) {
+        model.input.checkingIfKingIsInDanger = false;
+        return false
+    }
+    const kingRow = parseInt(kingPosition.charAt(0))
+    const kingColumn = kingPosition.charAt(1)
+
+    const currentMoves = { ...model.input.currentlyAvailableMoves }
+    const savedPiece = { ...model.input.currentMovingPiece }
+
+    model.input.currentlyAvailableMoves = {
+        anyMoves: false,
+        diagonally: [],
+        orthogonally: [],
+        pawnMoves: [],
+        knightMoves: []
+    };
+    const isInDanger = checkIfAnyPieceCanCapture(kingRow, kingColumn, kingPosition, opponentColor, currentPlayerColor)
+
+    if (isInDanger) {
+        console.log('the king is in danger')
+
+    } else {
+        console.log('the king is not in danger')
+    }
+    model.input.currentlyAvailableMoves = currentMoves;
+    model.input.currentMovingPiece = savedPiece;
+    model.input.checkingIfKingIsInDanger = false;
+    return isInDanger
+}
+
+function checkIfAnyPieceCanCapture(kingRow, kingColumn, kingPosition, opponentColor, currentPlayerColor) {
+    for (const position in model.data.squarePositions) {
+        const sqaure = model.data.squarePositions[position]
+        if (!sqaure.piece || sqaure.piece.split(' ')[0] === currentPlayerColor) continue;
+
+        const pieceType = sqaure.piece.split(' ')[1];
+        const pieceRow = sqaure.currentRow;
+        const pieceColumn = sqaure.currentColumn;
+        let anyCaptureMoves = false;
+        switch (pieceType) {
+            case 'bishop':
+                anyCaptureMoves = canMoveDiagonally(pieceRow, pieceColumn, 7, sqaure.piece.split(' '), position, currentPlayerColor);
+                break;
+            case 'pawn':
+                if (model.input.currentRound <= 1) {
+                    anyCaptureMoves = canMovePawn(pieceRow, pieceColumn, 2, sqaure.piece.split(' '), position, currentPlayerColor);
+                    break;
+                } else {
+                    anyCaptureMoves = canMovePawn(pieceRow, pieceColumn, 1, sqaure.piece.split(' '), position, currentPlayerColor)
+                    break;
+                }
+            case 'queen':
+                const queenOrthogonallyMoves = canMoveOrthogonally(pieceRow, pieceColumn, 7, sqaure.piece.split(' '), position, currentPlayerColor);
+                const queenDiagonallyMoves = canMoveDiagonally(pieceRow, pieceColumn, 7, sqaure.piece.split(' '), position, currentPlayerColor);
+                anyCaptureMoves = queenOrthogonallyMoves || queenDiagonallyMoves;
+                break;
+            case 'king':
+                const kingOrthogonallyMoves = canMoveOrthogonally(pieceRow, pieceColumn, 1, sqaure.piece.split(' '), position, currentPlayerColor);
+                const kingDiagonallyMoves = canMoveDiagonally(pieceRow, pieceColumn, 1, sqaure.piece.split(' '), position, currentPlayerColor);
+                anyCaptureMoves = kingOrthogonallyMoves || kingDiagonallyMoves;
+                break;
+            case 'rook':
+                anyCaptureMoves = canMoveOrthogonally(pieceRow, pieceColumn, 7, sqaure.piece.split(' '), position, currentPlayerColor);
+                break;
+            case 'knight':
+                anyCaptureMoves = canMoveKnight(pieceRow, pieceColumn, 1, sqaure.piece.split(' '), position, currentPlayerColor);
+                break;
+        }
+        if (anyCaptureMoves) {
+            const moves = model.input.currentlyAvailableMoves
+            if (
+                moves.diagonally.includes(kingPosition) ||
+                moves.orthogonally.includes(kingPosition) ||
+                moves.knightMoves.includes(kingPosition) ||
+                moves.pawnMoves.includes(kingPosition)) {
+                updateView();
+                return true;
+            }
+        }
+    }
+    updateView();
+    return false;
+
 }
 
 function clearAvailableMoveClasses() {

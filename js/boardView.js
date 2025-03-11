@@ -1,6 +1,7 @@
 function updateView() {
     let html = `
     ${renderChessBoard()}
+    <div>${model.input.gameText ?? ''}</div>
     `
     document.getElementById('app').innerHTML = html;
 }
@@ -101,5 +102,6 @@ function updatePositionsOfPieces() {
             <img src="${imgSrc}">
             </div>`
     }
-    updateView()
+
+    updateView();
 }
