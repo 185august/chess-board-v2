@@ -1,3 +1,32 @@
+function calculateMoves(directions, row, column, maxDistance, opponentColor, moves) {
+    for (const dir of directions) {
+        let attackPerDirection = 0;
+        for (let i = 1; i <= maxDistance; i++) {
+            const newRow = row + (dir.rowDelta * i)
+            const newColumn = String.fromCharCode(column.charCodeAt(0) + (dir.columnDelta * i));
+
+            if (newRow >= 1 && newRow <= 8 && newColumn >= "A" && newColumn <= "H") {
+                const position = newRow + newColumn;
+                if (model.data.squarePositions[position].piece.split(' ')[0] === opponentColor) {
+                    if (attackPerDirection >= 1) {
+                        break;
+                    }
+                    moves.push(position);
+                    attackPerDirection++
+                } else if (!model.data.squarePositions[position].piece) {
+                    if (attackPerDirection >= 1) {
+                        break;
+                    }
+                    moves.push(position);
+                } else {
+                    break;
+                }
+            } else {
+                break;
+            }
+        }
+    }
+}
 function canMoveDiagonally(row, column, maxDistance = 7, whatPiece, whatSquare, opponentColor) {
 
     const moves = model.input.currentlyAvailableMoves
@@ -11,49 +40,14 @@ function canMoveDiagonally(row, column, maxDistance = 7, whatPiece, whatSquare, 
         { rowDelta: 1, columnDelta: 1 },//up-right
         { rowDelta: 1, columnDelta: -1 }, // up-left
     ]
+    calculateMoves(directions, row, column, maxDistance, opponentColor, moves.diagonally)
 
-    for (const dir of directions) {
-        let attackPerDirection = 0;
-        for (let i = 1; i <= maxDistance; i++) {
-            const newRow = row + (dir.rowDelta * i);
-            const newColumn = String.fromCharCode(column.charCodeAt(0) + (dir.columnDelta * i));
-            //check if the position is on the board
-            if (newRow >= 1 && newRow <= 8 && newColumn >= 'A' && newColumn <= 'H') {
-                const position = newRow + newColumn;
-                if (model.data.squarePositions[position].piece.split(' ')[0] === opponentColor) {
-                    if (attackPerDirection >= 1) {
-                        break;
-                    }
-                    moves.diagonally.push(position);
-                    attackPerDirection++;
-                } else if (!model.data.squarePositions[position].piece) {
-                    if (attackPerDirection >= 1) {
-                        break;
-                    }
-                    moves.diagonally.push(position);
-                } else {
-                    break;
-                }
-                //square is not on board
-            } else {
-                break;
-            }
-        }
-    }
+
     model.data.squarePositions[whatSquare].piece = OriginalPiece
 
     if (!model.input.checkingIfKingIsInDanger) {
-        for (const move of moves.diagonally) {
-            const element = document.querySelector(`#square_${move}`);
-            if (model.data.squarePositions[move].piece.split(' ')[0] === opponentColor) {
-                if (element) {
-                    element.classList.add('available-move-attack');
-                }
-            }
-            if (element) {
-                element.classList.add('available-move');
-            }
-        }
+        showAvailableMoves(moves.diagonally, opponentColor)
+
     }
     moves.anyMoves = moves.diagonally.length > 0;
     return moves.anyMoves;
@@ -72,47 +66,13 @@ function canMoveOrthogonally(row, column, maxDistance = 7, whatPiece, whatSquare
         { rowDelta: 1, columnDelta: 0 },
         { rowDelta: 0, columnDelta: 1 },
     ]
-    for (const dir of directions) {
-        let attackPerDirection = 0;
-        for (let i = 1; i <= maxDistance; i++) {
-            const newRow = row + (dir.rowDelta * i)
-            const newColumn = String.fromCharCode(column.charCodeAt(0) + (dir.columnDelta * i));
+    calculateMoves(directions, row, column, maxDistance, opponentColor, moves.orthogonally)
 
-            if (newRow >= 1 && newRow <= 8 && newColumn >= "A" && newColumn <= "H") {
-                const position = newRow + newColumn;
-                if (model.data.squarePositions[position].piece.split(' ')[0] === opponentColor) {
-                    if (attackPerDirection >= 1) {
-                        break;
-                    }
-                    moves.orthogonally.push(position);
-                    attackPerDirection++
-                } else if (!model.data.squarePositions[position].piece) {
-                    if (attackPerDirection >= 1) {
-                        break;
-                    }
-                    moves.orthogonally.push(position);
-                } else {
-                    break;
-                }
-            } else {
-                break;
-            }
-        }
-    }
     model.data.squarePositions[whatSquare].piece = OriginalPiece
 
     if (!model.input.checkingIfKingIsInDanger) {
-        for (const move of moves.orthogonally) {
-            const element = document.querySelector(`#square_${move}`)
-            if (model.data.squarePositions[move].piece.split(' ')[0] === opponentColor) {
-                if (element) {
-                    element.classList.add('available-move-attack');
-                }
-            }
-            if (element) {
-                element.classList.add('available-move')
-            }
-        }
+        showAvailableMoves(moves.orthogonally, opponentColor)
+
     }
     moves.anyMoves = moves.orthogonally.length > 0;
     return moves.anyMoves
@@ -144,25 +104,7 @@ function canMovePawn(row, column, maxDistance = 2, whatPiece, whatSquare, oppone
             { rowDeltaAttack: 1, columnDeltaAttack: 1 },
         ]
     }
-    for (const dir of directions) {
-        for (let i = 1; i <= maxDistance; i++) {
-            const newRow = row + (dir.rowDelta * i)
-            const newColumn = String.fromCharCode(column.charCodeAt(0) + (dir.columnDelta * i));
-
-            if (newRow >= 1 && newRow <= 8 && newColumn >= "A" && newColumn <= "H") {
-                const position = newRow + newColumn;
-
-                if (!model.data.squarePositions[position].piece) {
-                    moves.pawnMoves.push(position);
-
-                } else {
-                    break;
-                }
-            } else {
-                break;
-            }
-        }
-    }
+    calculateMoves(directions, row, column, maxDistance, opponentColor, moves.pawnMoves)
     for (const dir of attackDirection) {
         for (let i = 0; i <= 2; i++) {
             const newRow = row + (dir.rowDeltaAttack)
@@ -178,17 +120,7 @@ function canMovePawn(row, column, maxDistance = 2, whatPiece, whatSquare, oppone
     model.data.squarePositions[whatSquare].piece = OriginalPiece
 
     if (!model.input.checkingIfKingIsInDanger) {
-        for (const move of moves.pawnMoves) {
-            const element = document.querySelector(`#square_${move}`)
-            if (model.data.squarePositions[move].piece.split(' ')[0] === opponentColor) {
-                if (element) {
-                    element.classList.add('available-move-attack');
-                }
-            }
-            if (element) {
-                element.classList.add('available-move')
-            }
-        }
+        showAvailableMoves(moves.pawnMoves, opponentColor)
     }
     moves.anyMoves = moves.pawnMoves.length > 0
     return moves.anyMoves
@@ -212,39 +144,30 @@ function canMoveKnight(row, column, maxDistance = 1, whatPiece, whatSquare, oppo
         { rowDelta: -1, columnDelta: -2 },
         { rowDelta: -1, columnDelta: 2 },
     ]
-    for (const dir of directions) {
-        const newRow = row + dir.rowDelta
-        const newColumn = String.fromCharCode(column.charCodeAt(0) + dir.columnDelta);
+    calculateMoves(directions, row, column, maxDistance, opponentColor, moves.knightMoves)
 
-        if (newRow >= 1 && newRow <= 8 && newColumn >= "A" && newColumn <= "H") {
-            const position = newRow + newColumn;
-            if (model.data.squarePositions[position].piece.split(' ')[0] === opponentColor) {
-                moves.knightMoves.push(position);
-            }
-            if (whatPiece[0] != model.data.squarePositions[position].piece.split(' ')[0]) {
-                moves.knightMoves.push(position);
-            }
-        }
-    }
     model.data.squarePositions[whatSquare].piece = OriginalPiece;
 
     if (!model.input.checkingIfKingIsInDanger) {
-        for (const move of moves.knightMoves) {
-            const element = document.querySelector(`#square_${move}`)
-            if (model.data.squarePositions[move].piece.split(' ')[0] === opponentColor) {
-                if (element) {
-                    element.classList.add('available-move-attack');
-                }
-            }
-            if (element) {
-                element.classList.add('available-move')
-            }
-        }
+        showAvailableMoves(moves.knightMoves, opponentColor)
     }
     moves.anyMoves = moves.knightMoves.length > 0
     return moves.anyMoves
 }
 
+function showAvailableMoves(moves, opponentColor) {
+    for (const move of moves) {
+        const element = document.querySelector(`#square_${move}`)
+        if (model.data.squarePositions[move].piece.split(' ')[0] === opponentColor) {
+            if (element) {
+                element.classList.add('available-move-attack');
+            }
+        }
+        if (element) {
+            element.classList.add('available-move')
+        }
+    }
+}
 
 
 
