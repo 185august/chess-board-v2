@@ -31,7 +31,7 @@ function selectPiece(row, column) {
     }
 
     if (!isCurrentPlayerPiece(model.data.squarePositions[whatSquare].piece)) {
-        return
+       return
     }
     // If there's already a piece selected
     clearAvailableMoveClasses();

@@ -1,4 +1,7 @@
-function calculateMoves(directions, row, column, maxDistance, opponentColor, moves) {
+function calculateMoves(directions, row, column, maxDistance, opponentColor, moves, whatSquare) {
+    /* const moves = model.input.currentlyAvailableMoves
+    moves.diagonally = []
+    const OriginalPiece = model.data.squarePositions[whatSquare].piece */
     for (const dir of directions) {
         let attackPerDirection = 0;
         for (let i = 1; i <= maxDistance; i++) {
@@ -7,12 +10,14 @@ function calculateMoves(directions, row, column, maxDistance, opponentColor, mov
 
             if (newRow >= 1 && newRow <= 8 && newColumn >= "A" && newColumn <= "H") {
                 const position = newRow + newColumn;
+
                 if (model.data.squarePositions[position].piece.split(' ')[0] === opponentColor) {
                     if (attackPerDirection >= 1) {
                         break;
                     }
                     moves.push(position);
                     attackPerDirection++
+
                 } else if (!model.data.squarePositions[position].piece) {
                     if (attackPerDirection >= 1) {
                         break;
@@ -24,6 +29,20 @@ function calculateMoves(directions, row, column, maxDistance, opponentColor, mov
             } else {
                 break;
             }
+        }
+    }
+}
+
+function showAvailableMoves(moves, opponentColor) {
+    for (const move of moves) {
+        const element = document.querySelector(`#square_${move}`)
+        if (model.data.squarePositions[move].piece.split(' ')[0] === opponentColor) {
+            if (element) {
+                element.classList.add('available-move-attack');
+            }
+        }
+        if (element) {
+            element.classList.add('available-move')
         }
     }
 }
@@ -40,7 +59,7 @@ function canMoveDiagonally(row, column, maxDistance = 7, whatPiece, whatSquare, 
         { rowDelta: 1, columnDelta: 1 },//up-right
         { rowDelta: 1, columnDelta: -1 }, // up-left
     ]
-    calculateMoves(directions, row, column, maxDistance, opponentColor, moves.diagonally)
+    calculateMoves(directions, row, column, maxDistance, opponentColor, moves.diagonally, whatSquare)
 
 
     model.data.squarePositions[whatSquare].piece = OriginalPiece
@@ -104,7 +123,23 @@ function canMovePawn(row, column, maxDistance = 2, whatPiece, whatSquare, oppone
             { rowDeltaAttack: 1, columnDeltaAttack: 1 },
         ]
     }
-    calculateMoves(directions, row, column, maxDistance, opponentColor, moves.pawnMoves)
+    for (const dir of directions) {
+        for (let i = 1; i <= maxDistance; i++) {
+            const newRow = row + (dir.rowDelta * i)
+            const newColumn = String.fromCharCode(column.charCodeAt(0) + dir.columnDelta * i)
+            if (newRow >= 1 && newRow <= 8 && newColumn >= 'A' && newColumn <= 'H') {
+                const position = newRow + newColumn;
+                if (!model.data.squarePositions[position].piece) {
+                    moves.pawnMoves.push(position);
+                } else {
+                    break;
+                }
+            } else {
+                break;
+            }
+        }
+    }
+
     for (const dir of attackDirection) {
         for (let i = 0; i <= 2; i++) {
             const newRow = row + (dir.rowDeltaAttack)
@@ -155,19 +190,7 @@ function canMoveKnight(row, column, maxDistance = 1, whatPiece, whatSquare, oppo
     return moves.anyMoves
 }
 
-function showAvailableMoves(moves, opponentColor) {
-    for (const move of moves) {
-        const element = document.querySelector(`#square_${move}`)
-        if (model.data.squarePositions[move].piece.split(' ')[0] === opponentColor) {
-            if (element) {
-                element.classList.add('available-move-attack');
-            }
-        }
-        if (element) {
-            element.classList.add('available-move')
-        }
-    }
-}
+
 
 
 
